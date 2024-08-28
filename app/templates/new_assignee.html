@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Create new assignee</h1>
+<form action="", method="post">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32) }}<br>
+        {% for error in form.name.errors %}
+            <span style="color: red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.origin_country.label }}<br>
+        {{ form.origin_country(size=32) }}<br>
+        {% for error in form.origin_country.errors %}
+            <span style="color: red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.destination_city.label }}<br>
+        {{ form.destination_city(size=32) }}<br>
+        {% for error in form.destination_city.errors %}
+            <span style="color: red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.company.label }}<br>
+        {{ form.company(size=32) }}<br>
+        {% for error in form.company.errors %}
+            <span style="color: red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{ form.submit() }}<br>
+    </p>
+
+</form>
+{% endblock %}

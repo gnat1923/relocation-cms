@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 import sqlalchemy as sa
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, NewAssigneeForm
+from app.models import User, Assignee
 
 @app.route("/")
 @app.route("/index")
@@ -60,3 +60,20 @@ def register():
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
+
+@app.route("/newassignee", methods=["POST", "GET"])
+@login_required
+def new_assignee():
+    form = NewAssigneeForm()
+    if form.validate_on_submit():
+        assignee = Assignee(name=form.name.data,
+                            origin_country=form.origin_country.data,
+                            destination_city=form.destination_city.data,
+                            company_id = form.company.data
+                            )
+        db.session.add(assignee)
+        db.session.commit()
+        flash("Assignee successfully added")
+        redirect(url_for("index"))
+
+    return render_template("new_assignee.html", title="New Assignee", form=form)

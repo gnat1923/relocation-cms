@@ -30,3 +30,11 @@ class RegistrationForm(FlaskForm):
             User.email == email.data))
         if user is not None:
             raise ValidationError("Please use a different email address")
+        
+class NewAssigneeForm(FlaskForm):
+    name = StringField("Assignee Name", validators=[DataRequired()])
+    origin_country = StringField("Origin Country", validators=[DataRequired()])
+    destination_city = StringField("Destination City", validators=[DataRequired()], default="Berlin")
+    company = StringField("Company", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+    # Need to add fields for packages!

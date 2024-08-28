@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,5 +23,73 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+class Company(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
+    contact: so.Mapped[str] = so.mapped_column(sa.String(256))
+    notes: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1064))
+
+    # Relationships
+    assignees: so.Mapped[List["Assignee"]] = so.relationship(back_populates="company")
+    company_packages: so.Mapped[List["CompanyPackage"]] = so.relationship(back_populates="company")
+
+    def __repr__(self):
+        return "<Company {}>".format(self.name)
+
+
+class Package(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
+    description: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
+
+    # Relationships
+    company_packages: so.Mapped[List["CompanyPackage"]] = so.relationship(back_populates="package")
+    assignees: so.Mapped[List["Assignee"]] = so.relationship(
+        secondary="assignee_package",
+        back_populates="packages"
+    )
+
+    def __repr__(self):
+        return "<Package {}>".format(self.name)
+    
+class CompanyPackage(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    company_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("company.id"))
+    package_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("package.id"))
+    price: so.Mapped[float] = so.mapped_column(sa.Float)
+
+    # Relationships
+    company: so.Mapped["Company"] = so.relationship(back_populates="company_packages")
+    package: so.Mapped["Package"] = so.relationship(back_populates="company_packages")
+
+    def __repr__(self):
+        return "<CompanyPackage {} for {}>".format(self.package.name, self.company.name)
+    
+# New association table for Assignee and Package
+assignee_package = sa.Table(
+    "assignee_package",
+    db.metadata,
+    sa.Column("assignee_id", sa.Integer, sa.ForeignKey("assignee.id")),
+    sa.Column("package_id", sa.Integer, sa.ForeignKey("package.id"))
+)
+
+
+class Assignee(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
+    origin_country: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
+    destination_city: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
+    company_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("company.id"))
+
+    # Relationships
+    company: so.Mapped["Company"] = so.relationship(back_populates="assignees")
+    packages: so.Mapped[List["Package"]] = so.relationship(
+        secondary="assignee_package",
+        back_populates="assignees"
+    )
+
+    def __repr__(self):
+        return "<Assignee {} from {}>".format(self.name, self.company.name)
     
 
