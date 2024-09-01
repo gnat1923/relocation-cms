@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Packages</h1>
+<a href="{{url_for('add_package')}}">Add Package</a><br><br>
+<table>
+    <tr>
+        <th>Package Name</th>
+        <th>Description</th>
+    </tr>
+    {% for package in packages %}
+        <tr>
+            <td>{{ package.name }} </td>
+            <td>{{ package.description }} </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

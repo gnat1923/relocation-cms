@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 import sqlalchemy as sa
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, NewAssigneeForm
-from app.models import User, Assignee
+from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm
+from app.models import User, Assignee, Company, Package, CompanyPackage
 
 @app.route("/")
 @app.route("/index")
@@ -77,3 +77,65 @@ def new_assignee():
         redirect(url_for("index"))
 
     return render_template("new_assignee.html", title="New Assignee", form=form)
+
+@app.route("/accounting")
+@login_required
+def accounting():
+    return render_template("accounting.html")
+
+@app.route("/packages", methods=["GET"])
+@login_required
+def packages():
+    '''packages = [
+        {"name":"8hr", "description":"An 8 hour relocation package"},
+        {"name":"12hr", "description":"A 12 hour relocation package"},
+        {"name":"20hr", "description":"A 20 hour relocation package"},
+        {"name":"40hr", "description":"A 40 hour relocation package"},
+        {"name":"Visa", "description":"Assist assignee with visa application"},
+        {"name":"VWP", "description":"Assist assignee with visa and work permit application"},
+        {"name":"F(V)", "description":"Assist assignee's family with visa application"},
+        {"name":"F(VWP)", "description":"Assist assignee' family with visa and work permit application"},
+        {"name":"AW", "description":"Assist an asignee already in Germany with changing their employer"}
+    ]'''
+    packages = Package.query.all()
+    return render_template("packages.html", title="Packages", packages=packages)
+
+@app.route("/packages/add_package", methods=["GET", "POST"])
+@login_required
+def add_package():
+    form = NewPackageForm()
+    if form.validate_on_submit():
+        package_name = form.name.data
+        package_description = ""
+        if form.description.data:
+            package_description = form.description.data
+        
+        package = Package(
+            name = package_name,
+            description = package_description
+        )
+        db.session.add(package)
+        db.session.commit()
+        flash("Package successfully added")
+        return redirect(url_for("packages"))
+
+    return render_template("add_package.html", title="Add Package", form=form)
+
+@app.route("/companies", methods=["GET"])
+@login_required
+def companies():
+    companies = [
+        {"name":"Facebook"},
+        {"name": "Apple"},
+        {"name": "Amazon"},
+        {"name": "Netflix"},
+        {"name": "Google"}
+    ]
+
+    return render_template("companies.html", companies=companies)
+
+@app.route("/companies/add_company", methods=["GET", "POST"])
+@login_required
+def add_company():
+    flash("Sorry, not available yet!")
+    return redirect(url_for("index"))

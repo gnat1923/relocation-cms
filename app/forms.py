@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 import sqlalchemy as sa
 from app import db
@@ -30,6 +30,18 @@ class RegistrationForm(FlaskForm):
             User.email == email.data))
         if user is not None:
             raise ValidationError("Please use a different email address")
+        
+class NewPackageForm(FlaskForm):
+    name = StringField("Package Name", validators=[DataRequired()])
+    description = StringField("Description (optional)")
+    submit = SubmitField("Submit")
+
+class NewCompanyForm(FlaskForm):
+    name = StringField("Company Name", validators=[DataRequired()])
+    contact = StringField("Contact email(s)", validators=[DataRequired()])
+    notes = TextAreaField("Additional Notes")
+    # need to add prices per package
+    submit = SubmitField("Submit")
         
 class NewAssigneeForm(FlaskForm):
     name = StringField("Assignee Name", validators=[DataRequired()])
