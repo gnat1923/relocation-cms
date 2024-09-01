@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, TextAreaField, SubmitField
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
+from wtforms import StringField, PasswordField, HiddenField, BooleanField, TextAreaField, SubmitField, FloatField, FieldList, FormField
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, NumberRange
 import sqlalchemy as sa
 from app import db
 from app.models import User
@@ -36,11 +36,19 @@ class NewPackageForm(FlaskForm):
     description = StringField("Description (optional)")
     submit = SubmitField("Submit")
 
+class PackagePriceForm(FlaskForm):
+    package_id = HiddenField("Package ID")  # Hidden field for package ID
+    package_name = StringField("Package Name", render_kw={"readonly":True})  # Read-only field to display the package name
+    price = FloatField('Price', validators=[DataRequired(), NumberRange(min=0)])
+
+    class Meta:
+        csrf = False
+
 class NewCompanyForm(FlaskForm):
     name = StringField("Company Name", validators=[DataRequired()])
     contact = StringField("Contact email(s)", validators=[DataRequired()])
     notes = TextAreaField("Additional Notes")
-    # need to add prices per package
+    packages = FieldList(FormField(PackagePriceForm))
     submit = SubmitField("Submit")
         
 class NewAssigneeForm(FlaskForm):

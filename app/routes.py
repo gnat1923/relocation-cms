@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 import sqlalchemy as sa
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm
+from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm, PackagePriceForm
 from app.models import User, Assignee, Company, Package, CompanyPackage
 
 @app.route("/")
@@ -124,18 +124,53 @@ def add_package():
 @app.route("/companies", methods=["GET"])
 @login_required
 def companies():
-    companies = [
+    companies = Company.query.all()
+    '''[
         {"name":"Facebook"},
         {"name": "Apple"},
         {"name": "Amazon"},
         {"name": "Netflix"},
         {"name": "Google"}
-    ]
+    ]'''
 
     return render_template("companies.html", companies=companies)
 
 @app.route("/companies/add_company", methods=["GET", "POST"])
 @login_required
 def add_company():
-    flash("Sorry, not available yet!")
-    return redirect(url_for("index"))
+    form = NewCompanyForm()
+
+    if request.method == "GET":
+        # Fetch all packages from db
+        packages = Package.query.all()
+        for package in packages:
+            package_form = PackagePriceForm()
+            package_form.package_id.data = package.id
+            package_form.package_name.data = package.name
+            form.packages.append_entry(package_form)
+
+    if form.validate_on_submit():
+        company = Company(
+            name = form.name.data,
+            contact = form.contact.data,
+            notes = form.notes.data
+        )
+        db.session.add(company)
+        db.session.flush() # Flush to get the company ID for the relationships
+
+        for package_form in form.packages:
+            company_package = CompanyPackage(
+                company_id = company.id,
+                package_id = package_form.package_id.data,
+                price = package_form.price.data
+            )
+            db.session.add(company_package)
+
+        db.session.commit()
+        flash("Company and package prices successfully added")
+        return redirect(url_for("companies"))
+    
+    else:
+        print(form.errors)
+    
+    return render_template("add_company.html", title="Add New Company", form=form)

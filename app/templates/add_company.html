@@ -1,5 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<h1>Add New Company</h1>
+<form action="", method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{form.name.label }}
+        {{ form.name(size=32) }}
+        {% for error in form.name.errors %}
+        <span style="color:red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{form.contact.label }}
+        {{ form.contact(size=32) }}
+        {% for error in form.contact.errors %}
+        <span style="color:red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <p>
+        {{form.notes.label }}
+        {{ form.notes(size=32) }}
+        {% for error in form.notes.errors %}
+        <span style="color:red">[{{ error }}] </span>
+        {% endfor %}
+    </p>
+    <table>
+        <tr>
+            <th>Package</th>
+            <th>Price</th>
+        </tr>
+        {% for package_form in form.packages %}
+        <tr>
+            <td>{{ package_form.package_id() }} {{ package_form.package_name.data }}</td>
+            <td>{{ package_form.price() }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p>{{ form.submit() }} </p>
+</form>
 {% endblock %}
