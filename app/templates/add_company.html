@@ -32,8 +32,11 @@
         </tr>
         {% for package_form in form.packages %}
         <tr>
-            <td>{{ package_form.package_id() }} {{ package_form.package_name.data }}</td>
-            <td>{{ package_form.price() }}</td>
+            
+            <td>{{ package_form.package_name.data }}</td>
+            <td>{{ package_form.price() }} </td>
+            <td>{{ package_form.package_id() }}</td>
+            
         </tr>
         {% endfor %}
     </table>

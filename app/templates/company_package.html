@@ -1,0 +1,23 @@
+{%extends "base.html"%}
+
+{% block content %}
+<h1>Company Packages</h1>
+<table>
+    <tr></tr>
+    <th>ID</th>
+    <th>company_id</th>
+    <th>package_id</th>
+    <th>price</th>
+    </tr>
+    
+    {% for package in packages %}
+    <tr>
+        <td>{{ package.id }} </td>
+        <td>{{ package.company_id }} </td>
+        <td>{{ package.package_id }} </td>
+        <td>{{ package.price }} </td>
+    </tr>
+    {% endfor %}
+    
+</table>
+{% endblock %}

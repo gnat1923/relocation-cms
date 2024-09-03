@@ -64,7 +64,9 @@ class CompanyPackage(db.Model):
     package: so.Mapped["Package"] = so.relationship(back_populates="company_packages")
 
     def __repr__(self):
-        return "<CompanyPackage {} for {}>".format(self.package.name, self.company.name)
+        package_name = self.package.name if self.package else "Unknown Package"
+        company_name = self.company.name if self.company else "Unknown Company"
+        return f"<CompanyPackage {package_name} for {company_name}: €{self.price}>"
     
 # New association table for Assignee and Package
 assignee_package = sa.Table(

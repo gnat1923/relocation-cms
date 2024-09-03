@@ -140,6 +140,7 @@ def companies():
 def add_company():
     form = NewCompanyForm()
 
+    #fetch all packages and send them to company form package field
     if request.method == "GET":
         # Fetch all packages from db
         packages = Package.query.all()
@@ -148,8 +149,11 @@ def add_company():
             package_form.package_id.data = package.id
             package_form.package_name.data = package.name
             form.packages.append_entry(package_form)
+            print(f"ID: {package.id} Name: {package.name}") #printing properly here
 
+    #submit the company section of the form
     if form.validate_on_submit():
+        print("Form data: ", request.form)
         company = Company(
             name = form.name.data,
             contact = form.contact.data,
@@ -158,13 +162,16 @@ def add_company():
         db.session.add(company)
         db.session.flush() # Flush to get the company ID for the relationships
 
+        #pull the price for each package and send to db
+        #this function is sending a flase package_id <input id= - why?
         for package_form in form.packages:
             company_package = CompanyPackage(
                 company_id = company.id,
                 package_id = package_form.package_id.data,
-                price = package_form.price.data
+                price = package_form.price.data               
             )
             db.session.add(company_package)
+            print(f"Created package company#{company.id}, package#{package_form.package_id.data}, cost: €{package_form.price.data}")
 
         db.session.commit()
         flash("Company and package prices successfully added")
@@ -174,3 +181,11 @@ def add_company():
         print(form.errors)
     
     return render_template("add_company.html", title="Add New Company", form=form)
+
+@app.route("/companies/company_packages", methods=["GET"])
+@login_required
+def view_company_packages():
+    # This function has taught me that my package id's are not being correctly assigned to company packages. It can probably be deleted later
+    packages = CompanyPackage.query.all()
+    #print(packages)
+    return render_template("company_package.html", packages=packages)
