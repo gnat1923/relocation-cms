@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Create new assignee</h1>
+<h1>Create New Assignee</h1>
 <form action="", method="post">
     {{ form.hidden_tag() }}
 
@@ -14,21 +14,21 @@
     </p>
     <p>
         {{ form.origin_country.label }}<br>
-        {{ form.origin_country(size=32) }}<br>
+        {{ form.origin_country(size=10) }}<br>
         {% for error in form.origin_country.errors %}
             <span style="color: red">[{{ error }}] </span>
         {% endfor %}
     </p>
     <p>
         {{ form.destination_city.label }}<br>
-        {{ form.destination_city(size=32) }}<br>
+        {{ form.destination_city(size=5) }}<br>
         {% for error in form.destination_city.errors %}
             <span style="color: red">[{{ error }}] </span>
         {% endfor %}
     </p>
     <p>
         {{ form.company.label }}<br>
-        {{ form.company(size=32) }}<br>
+        {{ form.company(size=5) }}<br>
         {% for error in form.company.errors %}
             <span style="color: red">[{{ error }}] </span>
         {% endfor %}

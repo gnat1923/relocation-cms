@@ -71,6 +71,7 @@ def new_assignee():
                             destination_city=form.destination_city.data,
                             company_id = form.company.data
                             )
+        print(form.data)
         db.session.add(assignee)
         db.session.commit()
         flash("Assignee successfully added")

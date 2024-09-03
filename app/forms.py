@@ -1,9 +1,19 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, HiddenField, BooleanField, TextAreaField, SubmitField, FloatField, FieldList, FormField
+from wtforms import StringField, PasswordField, HiddenField, BooleanField, TextAreaField, SubmitField, FloatField, FieldList, FormField, SelectField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, NumberRange
 import sqlalchemy as sa
 from app import db
-from app.models import User
+from app.models import User, Company
+
+countries_list = []
+with open("app/static/countries.txt", "r") as f:
+    for country in f:
+        countries_list.append(country)
+
+german_city_list = []
+with open("app/static/german_cities.txt", "r") as f:
+    for city in f:
+        german_city_list.append(city)
 
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
@@ -53,8 +63,19 @@ class NewCompanyForm(FlaskForm):
         
 class NewAssigneeForm(FlaskForm):
     name = StringField("Assignee Name", validators=[DataRequired()])
-    origin_country = StringField("Origin Country", validators=[DataRequired()])
-    destination_city = StringField("Destination City", validators=[DataRequired()], default="Berlin")
-    company = StringField("Company", validators=[DataRequired()])
+    origin_country = SelectField("Origin Country",
+                                 choices = [(country,country) for country in countries_list],
+                                  validators=[DataRequired()])
+    destination_city = SelectField("Destination City",
+                                   choices=[(city, city) for city in german_city_list],
+                                   validators=[DataRequired()], default="Berlin")
+    company = SelectField("Company", validators=[DataRequired()])
     submit = SubmitField("Submit")
     # Need to add fields for packages!
+
+    def __init__(self, *args, **kwargs):
+        super(NewAssigneeForm, self).__init__(*args, **kwargs)
+        # Query the database to get all company names and ids
+        companies = db.session.execute(sa.select(Company.id, Company.name).order_by(Company.name)).all()
+        # Set the choices for the company SelectField
+        self.company.choices = [(company.id, company.name) for company in companies]
