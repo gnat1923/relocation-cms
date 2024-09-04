@@ -25,18 +25,18 @@
         <span style="color:red">[{{ error }}] </span>
         {% endfor %}
     </p>
+    <h2>Package Prices</h2>
     <table>
         <tr>
             <th>Package</th>
             <th>Price</th>
+            
         </tr>
         {% for package_form in form.packages %}
         <tr>
-            
             <td>{{ package_form.package_name.data }}</td>
             <td>{{ package_form.price() }} </td>
-            <td>{{ package_form.package_id() }}</td>
-            
+            <td>{{ package_form.package_id.data }} </td>  
         </tr>
         {% endfor %}
     </table>

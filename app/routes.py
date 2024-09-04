@@ -2,6 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 import sqlalchemy as sa
+import pprint
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm, PackagePriceForm
 from app.models import User, Assignee, Company, Package, CompanyPackage
@@ -149,23 +150,35 @@ def add_company():
             package_form = PackagePriceForm()
             package_form.package_id.data = package.id
             package_form.package_name.data = package.name
+            package_form.price = None
             form.packages.append_entry(package_form)
-            print(f"ID: {package.id} Name: {package.name}") #printing properly here
+            #print(f"ID: {package_form.package_id.data} Name: {package_form.package_name.data}") #printing properly here
+            #print(type(package.id))
+        print("Before submission")
+        pprint.pp(request.form)
+        print(f"At creation: {form.packages[0].package_id.data}, {form.packages[0].package_name.data}")
 
     #submit the company section of the form
-    if form.validate_on_submit():
-        print("Form data: ", request.form)
+    if form.validate_on_submit() and request.method == "POST":
+        print("After submission")
+        print(f"At creation: {form.packages[0].package_id.data}, {form.packages[0].package_name.data}")
+        pprint.pp(request.form)
         company = Company(
             name = form.name.data,
             contact = form.contact.data,
             notes = form.notes.data
         )
+        #pprint.pp(f"Pre flush {request.form}\n------------------------")
         db.session.add(company)
         db.session.flush() # Flush to get the company ID for the relationships
+        #pprint.pp(f"Post flush {request.form}")
 
         #pull the price for each package and send to db
         #this function is sending a flase package_id <input id= - why?
         for package_form in form.packages:
+            print("See package form:")
+            for i in package_form:
+                print(i)
             company_package = CompanyPackage(
                 company_id = company.id,
                 package_id = package_form.package_id.data,
