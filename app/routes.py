@@ -152,49 +152,58 @@ def add_company():
             package_form.package_name.data = package.name
             package_form.price = None
             form.packages.append_entry(package_form)
-            #print(f"ID: {package_form.package_id.data} Name: {package_form.package_name.data}") #printing properly here
-            #print(type(package.id))
-        print("Before submission")
-        pprint.pp(request.form)
-        print(f"At creation: {form.packages[0].package_id.data}, {form.packages[0].package_name.data}")
+            
 
     #submit the company section of the form
     if form.validate_on_submit() and request.method == "POST":
-        print("After submission")
-        print(f"At creation: {form.packages[0].package_id.data}, {form.packages[0].package_name.data}")
-        pprint.pp(request.form)
-        company = Company(
-            name = form.name.data,
-            contact = form.contact.data,
-            notes = form.notes.data
-        )
-        #pprint.pp(f"Pre flush {request.form}\n------------------------")
-        db.session.add(company)
-        db.session.flush() # Flush to get the company ID for the relationships
-        #pprint.pp(f"Post flush {request.form}")
-
-        #pull the price for each package and send to db
-        #this function is sending a flase package_id <input id= - why?
-        for package_form in form.packages:
-            print("See package form:")
-            for i in package_form:
-                print(i)
-            company_package = CompanyPackage(
-                company_id = company.id,
-                package_id = package_form.package_id.data,
-                price = package_form.price.data               
+        try:
+            company = Company(
+                name = form.name.data,
+                contact = form.contact.data,
+                notes = form.notes.data
             )
-            db.session.add(company_package)
-            print(f"Created package company#{company.id}, package#{package_form.package_id.data}, cost: €{package_form.price.data}")
 
-        db.session.commit()
-        flash("Company and package prices successfully added")
-        return redirect(url_for("companies"))
+            db.session.add(company)
+            db.session.commit() # Flush to get the company ID for the relationships
+
+
+            #pull the price for each package and send to db
+            #this function is sending a flase package_id <input id= - why?
+            for filled_package_form in form.packages:
+                print("See package form:")
+                for i in filled_package_form:
+                    print(i)
+                    
+                company_package = CompanyPackage(
+                    company_id = company.id,
+                    package_id = request.form.get("package_id"),
+                    price = filled_package_form.price.data               
+                )
+                db.session.add(company_package)
+            
+
+            db.session.commit()
+            flash("Company and package prices successfully added")
+            return redirect(url_for("companies"))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occured: {str(e)}", "error")
+            return redirect(url_for("companies"))
+
+    elif request.method == "POST":
+        flash("There were errors in your submission. Please check the form and try again.", "error")
     
-    else:
-        print(form.errors)
+
     
     return render_template("add_company.html", title="Add New Company", form=form)
+
+@app.route("/companies/<company_name>")
+@login_required
+def view_company(company_name):
+    company = db.first_or_404(sa.select(Company).where(Company.name == company_name))
+
+    return render_template("view_company.html", title=f"Company Info - {company.name}", company=company)
 
 @app.route("/companies/company_packages", methods=["GET"])
 @login_required

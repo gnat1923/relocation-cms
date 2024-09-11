@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ company.name }} </h1>
+<h2>Contact Info:</h2>
+<p>{{ company.contact }} </p>
+
+{% if company.notes %}
+    <h2>Notes:</h2>
+    <p>{{ company.notes }} </p>
+{% endif %}
+<br><br>
+<h2>Price List:</h2>
+
+{% endblock %}

@@ -31,7 +31,7 @@ class Company(db.Model):
     notes: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1064))
 
     # Relationships
-    assignees: so.Mapped[List["Assignee"]] = so.relationship(back_populates="company")
+    assignees: so.Mapped[List["Assignee"]] = so.relationship(back_populates="company", cascade="all, delete-orphan")
     company_packages: so.Mapped[List["CompanyPackage"]] = so.relationship(back_populates="company")
 
     def __repr__(self):

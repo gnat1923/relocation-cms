@@ -10,7 +10,7 @@
         </tr>
         {% for company in companies %}
             <tr>
-                <td>{{ company.name }} </td>
+                <td><a href="{{url_for('view_company', company_name=company.name)}}">{{ company.name }}</a> </td>
             </tr>
         {% endfor %}
     </table>
