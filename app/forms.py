@@ -47,7 +47,7 @@ class NewPackageForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class PackagePriceForm(FlaskForm):
-    package_id = HiddenField("Package ID", render_kw={"readonly":True})  # Hidden field for package ID
+    package_id = HiddenField("Package ID")  # Hidden field for package ID
     package_name = StringField("Package Name", render_kw={"readonly":True})  # Read-only field to display the package name
     price = FloatField('Price', validators=[NumberRange(min=0)], default="")
 

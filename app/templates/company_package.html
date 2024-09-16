@@ -13,8 +13,8 @@
     {% for package in packages %}
     <tr>
         <td>{{ package.id }} </td>
-        <td>{{ package.company_id }} </td>
-        <td>{{ package.package_id }} </td>
+        <td>{{ package.company.name }} </td>
+        <td>{{ package.package.name }} </td>
         <td>{{ package.price }} </td>
     </tr>
     {% endfor %}

@@ -156,6 +156,9 @@ def add_company():
 
     #submit the company section of the form
     if form.validate_on_submit() and request.method == "POST":
+        print(request.form)
+        package_id_list = request.form.getlist('package_id')
+        print(f"Package ID list: {package_id_list}")
         try:
             company = Company(
                 name = form.name.data,
@@ -169,16 +172,18 @@ def add_company():
 
             #pull the price for each package and send to db
             #this function is sending a flase package_id <input id= - why?
+            package_id_counter = 0
             for filled_package_form in form.packages:
-                print("See package form:")
-                for i in filled_package_form:
-                    print(i)
+                '''print("See package form:")
+                print(f"Package ID submitted: {filled_package_form.package_id.data}")
+                print(f"Price submitted: {filled_package_form.price.data}")'''
                     
                 company_package = CompanyPackage(
                     company_id = company.id,
-                    package_id = request.form.get("package_id"),
+                    package_id = int(package_id_list[package_id_counter]),
                     price = filled_package_form.price.data               
                 )
+                package_id_counter += 1
                 db.session.add(company_package)
             
 
