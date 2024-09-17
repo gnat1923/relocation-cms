@@ -156,9 +156,8 @@ def add_company():
 
     #submit the company section of the form
     if form.validate_on_submit() and request.method == "POST":
-        print(request.form)
-        package_id_list = request.form.getlist('package_id')
-        print(f"Package ID list: {package_id_list}")
+
+        package_id_list = request.form.getlist('package_id') #pull package_ids from request.form
         try:
             company = Company(
                 name = form.name.data,
@@ -169,9 +168,6 @@ def add_company():
             db.session.add(company)
             db.session.commit() # Flush to get the company ID for the relationships
 
-
-            #pull the price for each package and send to db
-            #this function is sending a flase package_id <input id= - why?
             package_id_counter = 0
             for filled_package_form in form.packages:
                 '''print("See package form:")
@@ -214,6 +210,13 @@ def view_company(company_name):
 @login_required
 def view_company_packages():
     # This function has taught me that my package id's are not being correctly assigned to company packages. It can probably be deleted later
-    packages = CompanyPackage.query.all()
+    comp_packages = CompanyPackage.query.all()
+    comp_names = []
+    for company in Company.query.all():
+        comp_names.append(company.name)
+    print(comp_names)
+    packages = Package.query.all()
     #print(packages)
-    return render_template("company_package.html", packages=packages)
+    for package in comp_packages:
+        print(package.price)
+    return render_template("company_package.html", packages=packages, comp_packages=comp_packages, comp_names=comp_names)
