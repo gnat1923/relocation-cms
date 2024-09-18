@@ -11,5 +11,20 @@
 {% endif %}
 <br><br>
 <h2>Price List:</h2>
+<table>
+    <thead>
+        <th>Package</th>
+        <th>Price</th>
+    </thead>
+    <tbody>
+        {% for company_package in company.company_packages %}
+        <tr>
+            <td> {{ company_package.package.name }} </td>
+            <td> {{ company_package.price }} </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 {% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Assignees</h1>
+<table>
+    <thead>
+        <th>Assignee Name</th>
+        <th>Company</th>
+        <th>Origin Country</th>
+        <th>Destination City</th>
+    </thead>
+    <tbody>
+        {% for assignee in assignees %}
+        <tr>
+            <td>{{assignee.name}}</td>
+            <td>{{assignee.company.name}}</td>
+            <td>{{assignee.origin_country}}</td>
+            <td>{{assignee.destination_city}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

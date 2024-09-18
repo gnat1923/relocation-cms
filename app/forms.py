@@ -5,15 +5,6 @@ import sqlalchemy as sa
 from app import db
 from app.models import User, Company
 
-countries_list = []
-with open("app/static/countries.txt", "r") as f:
-    for country in f:
-        countries_list.append(country)
-
-german_city_list = []
-with open("app/static/german_cities.txt", "r") as f:
-    for city in f:
-        german_city_list.append(city)
 
 class LoginForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired()])
@@ -64,10 +55,8 @@ class NewCompanyForm(FlaskForm):
 class NewAssigneeForm(FlaskForm):
     name = StringField("Assignee Name", validators=[DataRequired()])
     origin_country = SelectField("Origin Country",
-                                 choices = [(country,country) for country in countries_list],
                                   validators=[DataRequired()])
     destination_city = SelectField("Destination City",
-                                   choices=[(city, city) for city in german_city_list],
                                    validators=[DataRequired()], default="Berlin")
     company = SelectField("Company", validators=[DataRequired()])
     submit = SubmitField("Submit")

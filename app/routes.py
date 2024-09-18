@@ -66,6 +66,20 @@ def register():
 @login_required
 def new_assignee():
     form = NewAssigneeForm()
+
+    countries_list = []
+    with open("app/static/countries.txt", "r") as f:
+        for country in f:
+            countries_list.append(country.strip())
+
+    german_city_list = []
+    with open("app/static/german_cities.txt", "r") as f:
+        for city in f:
+            german_city_list.append(city.strip())
+
+    form.origin_country.choices = [(country, country) for country in countries_list]
+    form.destination_city.choices = [(city, city) for city in german_city_list]
+
     if form.validate_on_submit():
         assignee = Assignee(name=form.name.data,
                             origin_country=form.origin_country.data,
@@ -80,10 +94,18 @@ def new_assignee():
 
     return render_template("new_assignee.html", title="New Assignee", form=form)
 
+@app.route("/assignees", methods=["GET"])
+@login_required
+def assignees():
+    assignees = Assignee.query.order_by(Assignee.create_date).all()
+
+    return render_template("assignees.html", assignees=assignees)
+
 @app.route("/accounting")
 @login_required
 def accounting():
     return render_template("accounting.html")
+    
 
 @app.route("/packages", methods=["GET"])
 @login_required
@@ -220,3 +242,4 @@ def view_company_packages():
     for package in comp_packages:
         print(package.price)
     return render_template("company_package.html", packages=packages, comp_packages=comp_packages, comp_names=comp_names)
+
