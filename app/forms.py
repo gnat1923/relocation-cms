@@ -48,6 +48,10 @@ class PackagePriceForm(FlaskForm):
 class NewCompanyForm(FlaskForm):
     name = StringField("Company Name", validators=[DataRequired()])
     contact = StringField("Contact email(s)", validators=[DataRequired()])
+    address1 = StringField("Address Line 1", validators=[DataRequired()])
+    address2 = StringField("Address Line 2 (Optional)")
+    postcode = IntegerField("Postcode", validators=[DataRequired()])
+    city = StringField("City", validators=[DataRequired()])
     notes = TextAreaField("Additional Notes")
     packages = FieldList(FormField(PackagePriceForm))
     submit = SubmitField("Submit")

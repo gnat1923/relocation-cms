@@ -174,7 +174,7 @@ def add_company():
             package_form.package_name.data = package.name
             package_form.price = None
             form.packages.append_entry(package_form)
-            
+          
 
     #submit the company section of the form
     if form.validate_on_submit() and request.method == "POST":
@@ -184,7 +184,11 @@ def add_company():
             company = Company(
                 name = form.name.data,
                 contact = form.contact.data,
-                notes = form.notes.data
+                notes = form.notes.data,
+                address1 = form.address1.data,
+                address2 = form.address2.data,
+                postcode = form.postcode.data,
+                city = form.city.data
             )
 
             db.session.add(company)
@@ -228,18 +232,87 @@ def view_company(company_name):
 
     return render_template("view_company.html", title=f"Company Info - {company.name}", company=company)
 
+@app.route("/companies/edit/<company_name>", methods=["GET", "POST"])
+@login_required
+def edit_company(company_name):
+    company = db.first_or_404(sa.select(Company).where(Company.name == company_name))
+    packages = db.session.execute(
+        sa.select(CompanyPackage).where(CompanyPackage.company_id == company.id)
+        ).scalars().all()
+    form = NewCompanyForm()
+
+    if request.method == "GET":
+        # Fetch all packages from db
+        #packages = Package.query.all() sorted above
+        for package in packages:
+            package_form = PackagePriceForm()
+            package_form.package_id.data = package.id
+            package_form.package_name.data = package.package.name
+            package_form.price = package.price
+            form.packages.append_entry(package_form)
+
+        #populate the entry fields
+        form.name.data = company.name
+        form.contact.data = company.contact
+        form.address1.data = company.address1
+        form.address2.data = company.address2
+        form.postcode.data = company.postcode
+        form.city.data = company.city
+        form.notes.data = company.notes
+
+    if form.validate_on_submit():
+        package_id_list = request.form.getlist('package_id') #pull package_ids from request.form
+        try:
+            company.name = form.name.data
+            company.contact = form.contact.data
+            company.address1 = form.address1.data
+            company.address2 = form.address2.data
+            company.postcode = form.postcode.data
+            company.city = form.city.data
+            company.notes = form.notes.data
+
+            package_id_counter = 0
+            for package_form in form.packages:
+                #find the related CompanyPackages in the db
+                company_package = db.session.execute(
+                    sa.select(CompanyPackage)
+                    .where(CompanyPackage.company_id == company.id)
+                    .where(CompanyPackage.package_id == package_form.package_id.data)
+                ).scalars().first()
+
+                if company_package:
+                    company_package.price = package_form.price.data
+                    
+                '''company_package = CompanyPackage(
+                    company_id = company.id,
+                    package_id = int(package_id_list[package_id_counter]),
+                    price = filled_package_form.price.data               
+                )
+                package_id_counter += 1
+                db.session.add(company_package)'''
+            
+
+            db.session.commit()
+            flash("Company and package prices successfully updated")
+            return redirect(url_for("companies"))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occured: {str(e)}", "error")
+            return redirect(url_for("companies"))
+
+    return render_template("edit_company.html", company=company, form=form)
+
 @app.route("/companies/company_packages", methods=["GET"])
 @login_required
 def view_company_packages():
     # This function has taught me that my package id's are not being correctly assigned to company packages. It can probably be deleted later
     comp_packages = CompanyPackage.query.all()
     comp_names = []
+    
     for company in Company.query.all():
         comp_names.append(company.name)
-    print(comp_names)
+    
     packages = Package.query.all()
-    #print(packages)
-    for package in comp_packages:
-        print(package.price)
     return render_template("company_package.html", packages=packages, comp_packages=comp_packages, comp_names=comp_names)
 

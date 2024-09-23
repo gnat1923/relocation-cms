@@ -29,6 +29,10 @@ class Company(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
     contact: so.Mapped[str] = so.mapped_column(sa.String(256))
+    address1: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
+    address2: so.Mapped[str] = so.mapped_column(sa.String(64))
+    postcode: so.Mapped[int] = so.mapped_column(sa.Integer)
+    city: so.Mapped[str] = so.mapped_column(sa.String(64))
     notes: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1064))
 
     # Relationships

@@ -2,14 +2,21 @@
 
 {% block content %}
 <h1>{{ company.name }} </h1>
+<a href="{{url_for('edit_company', company_name=company.name)}}">Edit</a>
 <h2>Contact Info:</h2>
 <p>{{ company.contact }} </p>
+<p>{{ company.address1 }} <br>
+    {% if company.address2 %}
+        {{ company.address2 }}<br>
+    {% endif %}
+    {{ company.postcode }} {{ company.city }}
+</p>
 
 {% if company.notes %}
     <h2>Notes:</h2>
     <p>{{ company.notes }} </p>
 {% endif %}
-<br><br>
+<br>
 <h2>Price List:</h2>
 <table>
     <thead>
