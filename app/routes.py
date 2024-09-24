@@ -101,26 +101,69 @@ def assignees():
 
     return render_template("assignees.html", assignees=assignees)
 
+@app.route("/assignees/<assignee_id>", methods=["GET"])
+@login_required
+def view_assignee(assignee_id):
+    assignee = db.first_or_404(sa.select(Assignee).where(Assignee.id == assignee_id))
+
+    return render_template("view_assignee.html", title=f"View Assignee - {assignee.name}", assignee=assignee)
+
+@app.route("/assignees/edit/<assignee_id>", methods=["GET", "POST"])
+@login_required
+def edit_assignee(assignee_id):
+    assignee = db.first_or_404(sa.select(Assignee).where(Assignee.id == assignee_id))
+    form = NewAssigneeForm()
+
+    #import lists
+    countries_list = []
+    with open("app/static/countries.txt", "r") as f:
+        for country in f:
+            countries_list.append(country.strip())
+
+    german_city_list = []
+    with open("app/static/german_cities.txt", "r") as f:
+        for city in f:
+            german_city_list.append(city.strip())
+
+    form.origin_country.choices = [(country, country) for country in countries_list]
+    form.destination_city.choices = [(city, city) for city in german_city_list]
+
+    if request.method == "GET":
+    #populate the form
+        form.name.data = assignee.name
+        form.origin_country.data = assignee.origin_country 
+        form.destination_city.data = assignee.destination_city 
+        form.company.data = assignee.company
+
+    if form.validate_on_submit() and request.method == "POST":
+        try:
+            #update db data
+            assignee.name = form.name.data
+            assignee.origin_country = form.origin_country.data
+            assignee.destination_city = form.destination_city.data
+            assignee.company_id = form.company.data
+
+            #commit to db
+            db.session.commit()
+            flash("Assignee successfully updated")
+            return redirect(url_for("assignees"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occured: {str(e)}", "error")
+            return redirect(url_for("assignees"))
+            
+
+    return render_template("edit_assignee.html", title=f"Edit Assignee - {assignee.name}", form=form, assignee=assignee)
+
 @app.route("/accounting")
 @login_required
 def accounting():
-    return render_template("accounting.html")
-    
+    return render_template("accounting.html")    
 
 @app.route("/packages", methods=["GET"])
 @login_required
 def packages():
-    '''packages = [
-        {"name":"8hr", "description":"An 8 hour relocation package"},
-        {"name":"12hr", "description":"A 12 hour relocation package"},
-        {"name":"20hr", "description":"A 20 hour relocation package"},
-        {"name":"40hr", "description":"A 40 hour relocation package"},
-        {"name":"Visa", "description":"Assist assignee with visa application"},
-        {"name":"VWP", "description":"Assist assignee with visa and work permit application"},
-        {"name":"F(V)", "description":"Assist assignee's family with visa application"},
-        {"name":"F(VWP)", "description":"Assist assignee' family with visa and work permit application"},
-        {"name":"AW", "description":"Assist an asignee already in Germany with changing their employer"}
-    ]'''
     packages = Package.query.all()
     return render_template("packages.html", title="Packages", packages=packages)
 
@@ -149,13 +192,6 @@ def add_package():
 @login_required
 def companies():
     companies = Company.query.all()
-    '''[
-        {"name":"Facebook"},
-        {"name": "Apple"},
-        {"name": "Amazon"},
-        {"name": "Netflix"},
-        {"name": "Google"}
-    ]'''
 
     return render_template("companies.html", companies=companies)
 
@@ -260,8 +296,22 @@ def edit_company(company_name):
         form.city.data = company.city
         form.notes.data = company.notes
 
+        #load up company packages
+        company_packages_get = db.session.execute(
+                    sa.select(CompanyPackage)
+                    .where(CompanyPackage.company_id == company.id)
+                ).scalars().all()
+        
+        pprint.pp(company_packages_get)
+
     if form.validate_on_submit():
         package_id_list = request.form.getlist('package_id') #pull package_ids from request.form
+        pprint.pp(package_id_list)
+
+        company_packages_get = db.session.execute(
+                    sa.select(CompanyPackage)
+                    .where(CompanyPackage.company_id == company.id)
+                ).scalars().all()
         try:
             company.name = form.name.data
             company.contact = form.contact.data
@@ -271,27 +321,15 @@ def edit_company(company_name):
             company.city = form.city.data
             company.notes = form.notes.data
 
-            package_id_counter = 0
-            for package_form in form.packages:
-                #find the related CompanyPackages in the db
-                company_package = db.session.execute(
-                    sa.select(CompanyPackage)
-                    .where(CompanyPackage.company_id == company.id)
-                    .where(CompanyPackage.package_id == package_form.package_id.data)
-                ).scalars().first()
+            package_price_list = []
+            for package in form.packages:
+                package_price_list.append(package.price.data)
 
-                if company_package:
-                    company_package.price = package_form.price.data
-                    
-                '''company_package = CompanyPackage(
-                    company_id = company.id,
-                    package_id = int(package_id_list[package_id_counter]),
-                    price = filled_package_form.price.data               
-                )
-                package_id_counter += 1
-                db.session.add(company_package)'''
+            i = 0
+            for company_package in company_packages_get:
+                company_package.price = package_price_list[i]
+                i += 1
             
-
             db.session.commit()
             flash("Company and package prices successfully updated")
             return redirect(url_for("companies"))
