@@ -13,6 +13,13 @@
             {% endfor %}
         </p>
         <p>
+            {{ form.default_price.label }}<br>
+            {{ form.default_price(size=32) }}<br>
+            {% for error in form.default_price.errors %}
+                <span style="color: red">[{{ error }}] </span>
+            {% endfor %}
+        </p>
+        <p>
             {{ form.description.label }}<br>
             {{ form.description(size=32) }}<br>
             {% for error in form.description.errors %}

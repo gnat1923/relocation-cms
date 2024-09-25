@@ -3,6 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from urllib.parse import urlsplit
 import sqlalchemy as sa
 import pprint
+import plotly.graph_objs as go
+import plotly.io as pio
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm, PackagePriceForm
 from app.models import User, Assignee, Company, Package, CompanyPackage
@@ -11,17 +13,41 @@ from app.models import User, Assignee, Company, Package, CompanyPackage
 @app.route("/index")
 @login_required
 def index():
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
+    #define case summary
+    case_count_list = [
+        {"case_type":"VMS", "count":15},
+        {"case_type":"RMS", "count":10},
+        {"case_type":"GMS", "count":8}
     ]
-    return render_template("index.html", title="Home", posts=posts)
+    
+    total_case_count = 0
+    for dict in case_count_list:
+        total_case_count += dict["count"]
+    
+    total_dict = {"case_type":"Total", "count":total_case_count}
+    case_count_list.append(total_dict)
+
+    # Reorder the list, total first
+    custom_order = ["Total", "GMS", "VMS", "RMS"]
+    ordered_case_count_list = sorted(case_count_list, key=lambda x: custom_order.index(x["case_type"]))
+
+    #define pie chart data (placeholders for now)
+    labels = ["VMS", "RMS", "GMS"]
+    values = []
+
+    for value in case_count_list:
+        for label in labels:
+            if value["case_type"] == label:
+                values.append(value["count"])
+
+    #create the pie chart
+    pie_chart = go.Figure(data=[go.Pie(labels=labels, values=values)])
+
+    #generate html for pie chart
+    pie_chart_div = pio.to_html(pie_chart, full_html=False)
+
+    
+    return render_template("index.html", title="Home", ordered_case_count_list=ordered_case_count_list, pie_chart_div=pie_chart_div)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -176,9 +202,11 @@ def add_package():
         package_description = ""
         if form.description.data:
             package_description = form.description.data
+        package_defualt_price = form.default_price.data
         
         package = Package(
             name = package_name,
+            default_price = package_defualt_price,
             description = package_description
         )
         db.session.add(package)

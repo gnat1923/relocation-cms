@@ -35,6 +35,7 @@ class RegistrationForm(FlaskForm):
 class NewPackageForm(FlaskForm):
     name = StringField("Package Name", validators=[DataRequired()])
     description = StringField("Description (optional)")
+    default_price = FloatField("Default Price")
     submit = SubmitField("Submit")
 
 class PackagePriceForm(FlaskForm):

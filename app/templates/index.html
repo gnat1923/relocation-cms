@@ -2,7 +2,11 @@
 
 {% block content %}
     <h1>Hello, {{ current_user.username }}!</h1>
-    {% for post in posts %}
-        <div><p><b>{{post.author.username}} says:</b> {{post.body}}</p></div>
-    {% endfor %}
+    <h2>Cases Summary:</h2>
+    <p>
+        {% for case in ordered_case_count_list %}
+        <b>{{case.case_type}}: </b> {{case.count}}<br>
+        {% endfor %}
+    </p>
+    <div>{{ pie_chart_div | safe }}</div>
 {% endblock %}

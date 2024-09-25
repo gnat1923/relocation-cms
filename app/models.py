@@ -30,9 +30,9 @@ class Company(db.Model):
     name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
     contact: so.Mapped[str] = so.mapped_column(sa.String(256))
     address1: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
-    address2: so.Mapped[str] = so.mapped_column(sa.String(64))
-    postcode: so.Mapped[int] = so.mapped_column(sa.Integer)
-    city: so.Mapped[str] = so.mapped_column(sa.String(64))
+    address2: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
+    postcode: so.Mapped[int] = so.mapped_column(sa.Integer, nullable=True)
+    city: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
     notes: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1064))
 
     # Relationships
@@ -46,6 +46,7 @@ class Company(db.Model):
 class Package(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
+    default_price: so.Mapped[float] = so.mapped_column(sa.Float, nullable=True)
     description: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
 
     # Relationships
