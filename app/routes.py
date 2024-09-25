@@ -216,6 +216,35 @@ def add_package():
 
     return render_template("add_package.html", title="Add Package", form=form)
 
+@app.route("/packages/edit/<package_id>", methods=["GET", "POST"])
+@login_required
+def edit_package(package_id):
+    package = db.first_or_404(sa.select(Package).where(Package.id == package_id))
+    form = NewPackageForm()
+
+    if request.method == "GET":
+        #populate the form
+        form.name.data = package.name
+        form.default_price.data = package.default_price
+        form.description.data = package.description
+
+    if form.validate_on_submit():
+        try:
+            package.name = form.name.data
+            package.default_price = form.default_price.data
+            package.description = form.description.data 
+
+            db.session.commit()
+            flash("Package successfully updated")
+            return redirect(url_for("packages"))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occured: {str(e)}", "error")
+            return redirect(url_for("packages"))
+            
+    return render_template("edit_package.html", title=f"Edit Package - {package.name}", form=form, package=package)
+
 @app.route("/companies", methods=["GET"])
 @login_required
 def companies():
@@ -236,7 +265,7 @@ def add_company():
             package_form = PackagePriceForm()
             package_form.package_id.data = package.id
             package_form.package_name.data = package.name
-            package_form.price = None
+            package_form.price = package.default_price
             form.packages.append_entry(package_form)
           
 
@@ -329,8 +358,6 @@ def edit_company(company_name):
                     sa.select(CompanyPackage)
                     .where(CompanyPackage.company_id == company.id)
                 ).scalars().all()
-        
-        pprint.pp(company_packages_get)
 
     if form.validate_on_submit():
         package_id_list = request.form.getlist('package_id') #pull package_ids from request.form
