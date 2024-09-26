@@ -60,7 +60,7 @@ def login():
         )
         if user is None or not user.check_password(form.password.data):
             flash("Invalid username or password")
-            return url_for("login")
+            return redirect(url_for("login"))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get("next")
         if not next_page or urlsplit(next_page).netloc != "":
@@ -112,11 +112,11 @@ def new_assignee():
                             destination_city=form.destination_city.data,
                             company_id = form.company.data
                             )
-        print(form.data)
+        
         db.session.add(assignee)
         db.session.commit()
         flash("Assignee successfully added")
-        redirect(url_for("index"))
+        return redirect(url_for("assignees"))
 
     return render_template("new_assignee.html", title="New Assignee", form=form)
 

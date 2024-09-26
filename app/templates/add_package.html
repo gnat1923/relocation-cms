@@ -1,32 +1,8 @@
 {% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
 
 {% block content %}
+    
 <h1>Add New Package</h1>
-    <form action="", method="post">
-        {{ form.hidden_tag() }}
-
-        <p>
-            {{ form.name.label }}<br>
-            {{ form.name(size=32) }}<br>
-            {% for error in form.name.errors %}
-                <span style="color: red">[{{ error }}] </span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.default_price.label }}<br>
-            {{ form.default_price(size=32) }}<br>
-            {% for error in form.default_price.errors %}
-                <span style="color: red">[{{ error }}] </span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.description.label }}<br>
-            {{ form.description(size=32) }}<br>
-            {% for error in form.description.errors %}
-                <span style="color: red">[{{ error }}] </span>
-            {% endfor %}
-        </p>
-        <p> {{ form.submit() }} </p>
-        <a href="{{url_for('packages')}}">Cancel</a>
-    </form>
+    {{ wtf.quick_form(form) }}
 {% endblock %}
