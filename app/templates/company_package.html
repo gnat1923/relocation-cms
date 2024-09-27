@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Company Packages</h1>
-<table>
+<table class="table table-striped table-hover">
     <thead>
         <tr>
             <th>Company</th>
@@ -14,7 +14,7 @@
     <tbody>
         {% for company in comp_names %} <!--Makes new row for every company in Company db-->
             <tr>
-                <td>{{ company }}</td>
+                <td><a href="{{url_for('view_company', company_name = company)}}">{{ company }}</a></td>
                 {% for package in packages %} <!--Looks through all packages in package db-->
                     {% for comp_package in comp_packages %} <!--Looks through all company packages-->
                         {% if comp_package.company.name == company and comp_package.package_id == package.id %}

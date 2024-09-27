@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Packages</h1>
-<a href="{{url_for('add_package')}}">Add Package</a><br><br>
-<table>
+<h1>Packages</h1><br>
+<button type="button" class="btn btn-success">
+    <a href="{{url_for('add_package')}}", style="color: white;">Add Package</a>
+</button><br><br>
+<table class="table table-striped table-hover">
     <tr>
         <th>Package Name</th>
         <th>Description</th>

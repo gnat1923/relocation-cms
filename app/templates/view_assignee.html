@@ -9,5 +9,7 @@
     <b>Origin Country:</b> {{ assignee.origin_country }}<br>
     <b>Destination City:</b> {{ assignee.destination_city }}
 </p>
-<a href="{{url_for('edit_assignee', assignee_id=assignee.id)}}">Edit</a>
+<button type="button" class="btn btn-success">
+    <a href="{{url_for('edit_assignee', assignee_id=assignee.id)}}" style="color: white;">Edit</a>
+</button>
 {% endblock %}
