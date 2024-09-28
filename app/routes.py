@@ -329,19 +329,36 @@ def view_company(company_name):
 @login_required
 def edit_company(company_name):
     company = db.first_or_404(sa.select(Company).where(Company.name == company_name))
-    packages = db.session.execute(
+    company_packages = db.session.execute(
         sa.select(CompanyPackage).where(CompanyPackage.company_id == company.id)
         ).scalars().all()
+    
+    all_packages = db.session.execute(
+        sa.select(Package)
+        ).scalars().all()
+    
     form = NewCompanyForm()
 
+    #needs to load ALL packages, and populate the ones already in db, leaving 'new' packages blank
+
     if request.method == "GET":
+        # Create a dict of existing company packages for quick lookup
+        company_packages = {cp.package_id: cp for cp in company.company_packages}
+        #print(company_packages)
+
         # Fetch all packages from db
         #packages = Package.query.all() sorted above
-        for package in packages:
+        for package in all_packages:
             package_form = PackagePriceForm()
             package_form.package_id.data = package.id
-            package_form.package_name.data = package.package.name
-            package_form.price = package.price
+            package_form.package_name.data = package.name
+            #package_form.price = package.price
+            if package.id in company_packages:
+                #print("True")
+                package_form.price = company_packages[package.id].price
+            else:
+                #print("False")
+                package_form.price = None
             form.packages.append_entry(package_form)
 
         #populate the entry fields
@@ -361,12 +378,16 @@ def edit_company(company_name):
 
     if form.validate_on_submit():
         package_id_list = request.form.getlist('package_id') #pull package_ids from request.form
-        pprint.pp(package_id_list)
 
         company_packages_get = db.session.execute(
                     sa.select(CompanyPackage)
                     .where(CompanyPackage.company_id == company.id)
                 ).scalars().all()
+        
+        company_package_ids = [] #list of all current package_ids in company_package db
+        for company_package in company_packages_get:
+            company_package_ids.append(company_package.package_id)
+
         try:
             company.name = form.name.data
             company.contact = form.contact.data
@@ -376,15 +397,35 @@ def edit_company(company_name):
             company.city = form.city.data
             company.notes = form.notes.data
 
-            package_price_list = []
+            package_price_list = [] #list of package prices from form
             for package in form.packages:
                 package_price_list.append(package.price.data)
-
+        
+            #create id / price dict
+            id_price_dict = []
             i = 0
-            for company_package in company_packages_get:
-                company_package.price = package_price_list[i]
+            for package in package_id_list:
+                id_price_dict.append({"id": package, "price": package_price_list[i]})
                 i += 1
             
+            #loop through dict to update package prices
+            for i in id_price_dict:
+                #if package id already exists in company_packages
+                if int(i["id"]) in company_package_ids:
+                    for company_package in company_packages_get:
+                        if int(company_package.package_id) == int(i["id"]):
+                            company_package.price = i["price"]
+                            db.session.commit()
+                            continue
+                #if package id does not exist in company_package (new package type)
+                else:
+                    new_company_package = CompanyPackage(
+                        company_id = company.id,
+                        package_id = i["id"],
+                        price = i["price"]
+                    )
+                    db.session.add(new_company_package)
+          
             db.session.commit()
             flash("Company and package prices successfully updated")
             return redirect(url_for("companies"))
@@ -408,4 +449,18 @@ def view_company_packages():
     
     packages = Package.query.all()
     return render_template("company_package.html", packages=packages, comp_packages=comp_packages, comp_names=comp_names)
+
+@app.route("/companies/<company_name>/assignees")
+@login_required
+def company_assignees(company_name):
+    #assignees = db.session.execute(sa.select(Assignee).where(Company.name == company_name)).scalars().all()
+    company = db.session.execute(sa.select(Company).where(Company.name == company_name)).scalar_one_or_none()
+
+    if company is None:
+        #handle the case where company does not exist
+        return render_template("404.html", message="Company not found"),404
+    
+    assignees = company.assignees
+
+    return render_template("view_company_assignees.html", title=f"{company_name} - Assignees", assignees=assignees, company_name=company_name)
 

@@ -3,10 +3,13 @@
 {% block content %}
 <h1>Accounting</h1>
 <h2>Admin</h2>
+<h3>Packages</h3>
 <a href="{{url_for('packages')}}">View Packages</a><br>
 <a href="{{url_for('add_package')}}">Add Package</a><br>
+<h3>Companies</h3>
 <a href="{{url_for('companies')}}">View Companies</a><br>
 <a href="{{url_for('add_company')}}">Add Company</a><br>
+<h3>Assignees</h3>
 <a href="{{url_for('assignees')}}">View Assignees</a><br>
 <a href="{{url_for('new_assignee')}}">Add Assignee</a><br>
 {% endblock %}

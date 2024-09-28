@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{company_name}} - Assignees</h1>
+    <table class="table table-striped table-hover">
+        <thead>
+            <th>Name</th>
+            <th>Origin Country</th>
+            <th>Destination City</th>
+            <th>Create Date</th>
+        </thead>
+        <tbody>
+            {% for assignee in assignees %}
+                <tr>
+                    <td>{{assignee.name}}</td>
+                    <td>{{assignee.origin_country}}</td>
+                    <td>{{assignee.destination_city}}</td>
+                    <td>{{assignee.create_date}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
