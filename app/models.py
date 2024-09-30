@@ -48,6 +48,7 @@ class Package(db.Model):
     name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True, unique=True)
     default_price: so.Mapped[float] = so.mapped_column(sa.Float, nullable=True)
     description: so.Mapped[Optional[str]] = so.mapped_column(sa.String(500))
+    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=True)
 
     # Relationships
     company_packages: so.Mapped[List["CompanyPackage"]] = so.relationship(back_populates="package")

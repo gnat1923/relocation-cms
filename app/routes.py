@@ -200,6 +200,7 @@ def add_package():
     if form.validate_on_submit():
         package_name = form.name.data
         package_description = ""
+        package_active = form.active.data
         if form.description.data:
             package_description = form.description.data
         package_defualt_price = form.default_price.data
@@ -207,7 +208,8 @@ def add_package():
         package = Package(
             name = package_name,
             default_price = package_defualt_price,
-            description = package_description
+            description = package_description,
+            active = package_active
         )
         db.session.add(package)
         db.session.commit()
@@ -227,12 +229,14 @@ def edit_package(package_id):
         form.name.data = package.name
         form.default_price.data = package.default_price
         form.description.data = package.description
+        form.active.data = package.active
 
     if form.validate_on_submit():
         try:
             package.name = form.name.data
             package.default_price = form.default_price.data
             package.description = form.description.data 
+            package.active = form.active.data
 
             db.session.commit()
             flash("Package successfully updated")
@@ -260,7 +264,7 @@ def add_company():
     #fetch all packages and send them to company form package field
     if request.method == "GET":
         # Fetch all packages from db
-        packages = Package.query.all()
+        packages = Package.query.where(Package.active == True).all()
         for package in packages:
             package_form = PackagePriceForm()
             package_form.package_id.data = package.id

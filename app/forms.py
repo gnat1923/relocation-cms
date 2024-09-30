@@ -36,6 +36,7 @@ class NewPackageForm(FlaskForm):
     name = StringField("Package Name", validators=[DataRequired()])
     description = StringField("Description (optional)")
     default_price = FloatField("Default Price (€)")
+    active = BooleanField("Active Package?", default=True)
     submit = SubmitField("Submit")
 
 class PackagePriceForm(FlaskForm):
