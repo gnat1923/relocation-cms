@@ -55,6 +55,7 @@ class NewCompanyForm(FlaskForm):
     postcode = IntegerField("Postcode", validators=[DataRequired()])
     city = StringField("City", validators=[DataRequired()])
     notes = TextAreaField("Additional Notes")
+    active = BooleanField("Active Company?")
     packages = FieldList(FormField(PackagePriceForm))
     submit = SubmitField("Submit")
         

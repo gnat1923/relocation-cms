@@ -34,6 +34,7 @@ class Company(db.Model):
     postcode: so.Mapped[int] = so.mapped_column(sa.Integer, nullable=True)
     city: so.Mapped[str] = so.mapped_column(sa.String(64), nullable=True)
     notes: so.Mapped[Optional[str]] = so.mapped_column(sa.String(1064))
+    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=True, default=True)
 
     # Relationships
     assignees: so.Mapped[List["Assignee"]] = so.relationship(back_populates="company", cascade="all, delete-orphan")

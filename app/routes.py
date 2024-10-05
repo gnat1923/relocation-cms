@@ -252,7 +252,11 @@ def edit_package(package_id):
 @app.route("/companies", methods=["GET"])
 @login_required
 def companies():
-    companies = Company.query.all()
+    #companies = Company.query.all()
+    companies = db.session.execute(
+        sa.select(Company)
+        .where(Company.active == True)
+    ).scalars().all()
 
     return render_template("companies.html", companies=companies)
 
@@ -339,6 +343,7 @@ def edit_company(company_name):
     
     all_packages = db.session.execute(
         sa.select(Package)
+        .where(Package.active == True)
         ).scalars().all()
     
     form = NewCompanyForm()
@@ -372,6 +377,7 @@ def edit_company(company_name):
         form.address2.data = company.address2
         form.postcode.data = company.postcode
         form.city.data = company.city
+        form.active.data = company.active
         form.notes.data = company.notes
 
         #load up company packages
@@ -399,6 +405,7 @@ def edit_company(company_name):
             company.address2 = form.address2.data
             company.postcode = form.postcode.data
             company.city = form.city.data
+            company.active = form.active.data
             company.notes = form.notes.data
 
             package_price_list = [] #list of package prices from form
@@ -468,3 +475,12 @@ def company_assignees(company_name):
 
     return render_template("view_company_assignees.html", title=f"{company_name} - Assignees", assignees=assignees, company_name=company_name)
 
+@app.route("/inactive_companies", methods=["GET"])
+@login_required
+def view_inactive_companies():
+    inactive_companies = db.session.execute(
+        sa.select(Company)
+        .where(Company.active == False)
+    ).scalars().all()
+
+    return render_template("view_companies_inactive.html", title="Inactive Companies", inactive_companies=inactive_companies)
