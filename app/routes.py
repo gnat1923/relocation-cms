@@ -104,6 +104,7 @@ def new_assignee():
             german_city_list.append(city.strip())
 
     form.origin_country.choices = [(country, country) for country in countries_list]
+    form.nationality.choices = [(country, country) for country in countries_list]
     form.destination_city.choices = [(city, city) for city in german_city_list]
 
     if form.validate_on_submit():
@@ -152,14 +153,26 @@ def edit_assignee(assignee_id):
             german_city_list.append(city.strip())
 
     form.origin_country.choices = [(country, country) for country in countries_list]
+    form.nationality.choices = [(country, country) for country in countries_list]
     form.destination_city.choices = [(city, city) for city in german_city_list]
 
     if request.method == "GET":
     #populate the form
         form.name.data = assignee.name
-        form.origin_country.data = assignee.origin_country 
+        form.origin_country.data = assignee.origin_country
+        form.nationality.data = assignee.nationality 
         form.destination_city.data = assignee.destination_city 
         form.company.data = assignee.company
+        form.booking_date.data = assignee.booking_date
+        form.arrival_date.data = assignee.arrival_date
+        form.work_start_date.data = assignee.work_start_date
+        form.temp_flat.data = assignee.temp_flat
+        form.spouse.data = assignee.spouse
+        form.child.data = assignee.child
+        form.pets.data = assignee.pets
+        form.hub.data = assignee.hub
+        form.hr_contact.data = assignee.hr_contact
+        form.job_title.data = assignee.job_title
 
     if form.validate_on_submit() and request.method == "POST":
         try:
@@ -167,7 +180,18 @@ def edit_assignee(assignee_id):
             assignee.name = form.name.data
             assignee.origin_country = form.origin_country.data
             assignee.destination_city = form.destination_city.data
+            assignee.nationality = form.nationality.data
             assignee.company_id = form.company.data
+            assignee.booking_date = form.booking_date.data
+            assignee.arrival_date = form.arrival_date.data
+            assignee.work_start_date = form.work_start_date.data
+            assignee.temp_flat = form.temp_flat.data
+            assignee.spouse = form.spouse.data
+            assignee.child = form.child.data
+            assignee.pets = form.pets.data
+            assignee.hub = form.hub.data
+            assignee.hr_contact = form.hr_contact.data
+            assignee.job_title = form.job_title.data
 
             #commit to db
             db.session.commit()

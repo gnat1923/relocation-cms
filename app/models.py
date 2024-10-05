@@ -1,5 +1,5 @@
 from typing import Optional, List
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -88,9 +88,20 @@ assignee_package = sa.Table(
 class Assignee(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
+    nationality: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
     origin_country: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
     destination_city: so.Mapped[str] = so.mapped_column(sa.String(100), index=True)
     company_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("company.id"))
+    booking_date: so.Mapped[date] = so.mapped_column(sa.Date)
+    arrival_date: so.Mapped[date] = so.mapped_column(sa.Date)
+    work_start_date: so.Mapped[date] = so.mapped_column(sa.Date)
+    temp_flat: so.Mapped[bool] = so.mapped_column(sa.Boolean)
+    spouse: so.Mapped[bool] = so.mapped_column(sa.Boolean)
+    child: so.Mapped[bool] = so.mapped_column(sa.Boolean)
+    pets: so.Mapped[bool] = so.mapped_column(sa.Boolean)
+    hub: so.Mapped[str] = so.mapped_column(sa.String(50))
+    hr_contact: so.Mapped[str] = so.mapped_column(sa.String(200))
+    job_title: so.Mapped[str] = so.mapped_column(sa.String(200))
     create_date: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
 
     # Relationships

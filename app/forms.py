@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, HiddenField, BooleanField, TextAreaField, SubmitField, FloatField, FieldList, FormField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, HiddenField, DateField, BooleanField, TextAreaField, SubmitField, FloatField, FieldList, FormField, SelectField, IntegerField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, NumberRange
 import sqlalchemy as sa
 from app import db
@@ -61,11 +61,23 @@ class NewCompanyForm(FlaskForm):
         
 class NewAssigneeForm(FlaskForm):
     name = StringField("Assignee Name", validators=[DataRequired()])
+    nationality = SelectField("Origin Country",
+                                  validators=[DataRequired()])
     origin_country = SelectField("Origin Country",
                                   validators=[DataRequired()])
     destination_city = SelectField("Destination City",
                                    validators=[DataRequired()], default="Berlin")
     company = SelectField("Company", validators=[DataRequired()])
+    booking_date = DateField("Booking Date", validators=[DataRequired()])
+    arrival_date = DateField("Arrival Date")
+    work_start_date = DateField("Work Start Date")
+    temp_flat = BooleanField("Tempory Flat?")
+    spouse = BooleanField("Spouse?")
+    child = BooleanField("Child?")
+    pets = BooleanField("Pets?")
+    hub = StringField("HUB #")
+    hr_contact = StringField("HR Contact")
+    job_title = StringField("Job Title")
     submit = SubmitField("Submit")
     # Need to add fields for packages!
 
