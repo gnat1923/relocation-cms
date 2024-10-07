@@ -3,5 +3,40 @@
 
 {% block content %}
 <h1>Create New Assignee</h1>
-    {{wtf.quick_form(form)}}
+    
+    <form action="", method="POST">
+        {{ assignee_form.hidden_tag() }}
+
+        {{ wtf.form_field(assignee_form.name) }}
+        {{ wtf.form_field(assignee_form.nationality) }}
+        {{ wtf.form_field(assignee_form.origin_country) }}
+        {{ wtf.form_field(assignee_form.destination_city) }}
+        {{ wtf.form_field(assignee_form.company) }}
+
+        {{ wtf.form_field(assignee_form.booking_date) }}
+        {{ wtf.form_field(assignee_form.arrival_date) }}
+        {{ wtf.form_field(assignee_form.work_start_date) }}
+        {{ wtf.form_field(assignee_form.temp_flat) }}
+        {{ wtf.form_field(assignee_form.spouse) }}
+
+        {{ wtf.form_field(assignee_form.child) }}
+        {{ wtf.form_field(assignee_form.pets) }}
+        {{ wtf.form_field(assignee_form.hub) }}
+        {{ wtf.form_field(assignee_form.hr_contact) }}
+        {{ wtf.form_field(assignee_form.job_title) }}
+    <hr>
+
+        {% for assignee_package in assignee_form.assignee_packages %}
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" >
+                <label class="form-check-label" for="flexCheckDefault">
+                    {{assignee_package.package_name.data}} 
+                </label>
+              </div>
+            <br>
+        {% endfor %}
+        {{ assignee_form.submit }}
+    </form>
+
 {% endblock %}

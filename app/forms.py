@@ -58,6 +58,14 @@ class NewCompanyForm(FlaskForm):
     active = BooleanField("Active Company?")
     packages = FieldList(FormField(PackagePriceForm))
     submit = SubmitField("Submit")
+
+class AssigneePackageForm(FlaskForm):
+    package_id = HiddenField("Package ID")  # Hidden field for package ID
+    package_name = StringField("Package Name", render_kw={"readonly":True})
+    package_status = BooleanField("Booked?")
+
+    class Meta:
+        csrf = False
         
 class NewAssigneeForm(FlaskForm):
     name = StringField("Assignee Name", validators=[DataRequired()])
@@ -78,8 +86,8 @@ class NewAssigneeForm(FlaskForm):
     hub = StringField("HUB #")
     hr_contact = StringField("HR Contact")
     job_title = StringField("Job Title")
+    assignee_packages = FieldList(FormField(AssigneePackageForm))
     submit = SubmitField("Submit")
-    # Need to add fields for packages!
 
     def __init__(self, *args, **kwargs):
         super(NewAssigneeForm, self).__init__(*args, **kwargs)
@@ -87,3 +95,4 @@ class NewAssigneeForm(FlaskForm):
         companies = db.session.execute(sa.select(Company.id, Company.name).order_by(Company.name)).all()
         # Set the choices for the company SelectField
         self.company.choices = [(company.id, company.name) for company in companies]
+

@@ -6,7 +6,7 @@ import pprint
 import plotly.graph_objs as go
 import plotly.io as pio
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, NewCompanyForm, NewPackageForm, PackagePriceForm
+from app.forms import LoginForm, RegistrationForm, NewAssigneeForm, AssigneePackageForm, NewCompanyForm, NewPackageForm, PackagePriceForm
 from app.models import User, Assignee, Company, Package, CompanyPackage
 
 @app.route("/")
@@ -91,8 +91,8 @@ def register():
 @app.route("/newassignee", methods=["POST", "GET"])
 @login_required
 def new_assignee():
-    form = NewAssigneeForm()
-
+    assignee_form = NewAssigneeForm()
+    
     countries_list = []
     with open("app/static/countries.txt", "r") as f:
         for country in f:
@@ -103,23 +103,70 @@ def new_assignee():
         for city in f:
             german_city_list.append(city.strip())
 
-    form.origin_country.choices = [(country, country) for country in countries_list]
-    form.nationality.choices = [(country, country) for country in countries_list]
-    form.destination_city.choices = [(city, city) for city in german_city_list]
+    packages = Package.query.where(Package.active == True).all()
 
-    if form.validate_on_submit():
-        assignee = Assignee(name=form.name.data,
-                            origin_country=form.origin_country.data,
-                            destination_city=form.destination_city.data,
-                            company_id = form.company.data
-                            )
+    #populate dropdown menus
+    assignee_form.origin_country.choices = [(country, country) for country in countries_list]
+    assignee_form.nationality.choices = [(country, country) for country in countries_list]
+    assignee_form.destination_city.choices = [(city, city) for city in german_city_list]
+
+    #create package checkboxes
+    for package in packages:
+        assignee_package_form = AssigneePackageForm()
+        assignee_package_form.package_id.data = package.id
+        assignee_package_form.package_name.data = package.name
+        assignee_form.assignee_packages.append_entry(assignee_package_form)
+
+    #populate page at GET request
+    if request.method =="GET":
+        ...
         
-        db.session.add(assignee)
-        db.session.commit()
-        flash("Assignee successfully added")
-        return redirect(url_for("assignees"))
 
-    return render_template("new_assignee.html", title="New Assignee", form=form)
+    if assignee_form.validate_on_submit():
+        pprint.pp(request.data)
+        try:
+            #create assignee
+            assignee = Assignee(name=assignee_form.name.data,
+                                nationality=assignee_form.nationality.data,
+                                origin_country=assignee_form.origin_country.data,
+                                destination_city=assignee_form.destination_city.data,
+                                company_id = assignee_form.company.data,
+                                booking_date=assignee_form.booking_date.data,
+                                arrival_date=assignee_form.arrival_date.data,
+                                work_start_date=assignee_form.work_start_date.data,
+                                temp_flat=assignee_form.temp_flat.data,
+                                spouse=assignee_form.spouse.data,
+                                child=assignee_form.child.data,
+                                pets=assignee_form.pets.data,
+                                hub=assignee_form.hub.data,
+                                hr_contact=assignee_form.hr_contact.data,
+                                job_title=assignee_form.job_title.data
+                                )
+            
+            db.session.add(assignee)
+            db.session.commit()
+            flash("Assignee successfully added")
+
+            #create AssigneePackage Entries
+            for assignee_package in assignee_form.assignee_packages:
+                if assignee_package.package_status == True:
+                    #new_assignee_package = an object that can be sent to the db
+                    #commit to db
+                    ...
+                else:
+                    pass
+            #flash packages created
+
+            return redirect(url_for("assignees"))
+        
+        except Exception as e:
+            pprint.pp(request.form)
+            db.session.rollback()
+            flash(f"An error occured: {str(e)}", "error")
+            return redirect(url_for("assignees"))
+
+
+    return render_template("new_assignee.html", title="New Assignee", assignee_form=assignee_form)
 
 @app.route("/assignees", methods=["GET"])
 @login_required
@@ -214,8 +261,15 @@ def accounting():
 @app.route("/packages", methods=["GET"])
 @login_required
 def packages():
-    packages = Package.query.all()
+    packages = Package.query.where(Package.active == True).all()
     return render_template("packages.html", title="Packages", packages=packages)
+
+@app.route("/inactive_packages", methods=["GET"])
+@login_required
+def view_inactive_packages():
+    packages = Package.query.where(Package.active == False).all()
+
+    return render_template("view_packages_inactive.html", title="Inactive Packages", packages=packages)
 
 @app.route("/packages/add_package", methods=["GET", "POST"])
 @login_required
