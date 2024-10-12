@@ -123,8 +123,37 @@ def new_assignee():
         
 
     if assignee_form.validate_on_submit():
-        pprint.pp(request.data)
+        #pprint.pp(request.form)
         try:
+            '''assignee_package_list = []
+            #create list of asignee packages
+            for package in assignee_form.assignee_packages:
+                print(f"Packagedata: {package}")
+                if package.package_status == True:
+                    assignee_package_list.append(Package(package.id))
+            print(f"Package List: {assignee_package_list}")'''
+
+            #create AssigneePackage Entries
+            assignee_packages = []
+            for assignee_package in assignee_form.assignee_packages:
+                #print(assignee_package.name)
+                if assignee_package.package_status.data == True:
+                    print(f"Package Name: {assignee_package.package_name.data} \nID: {assignee_package.package_id.data} \nStatus: {assignee_package.package_status.data} ")
+                    '''print(f"Package ID data: {assignee_package.package_id.data}\n")
+                    package_id = assignee_package.package_id.data  # Extract package ID from HiddenField
+                    package = Package.query.get(package_id)  # Fetch the package using the ID
+                    assignee.packages.append(package)  # Add package to assignee'''
+                    package_id = str(assignee_package.package_id.data)
+                    value_start = package_id.find('value="') + 7  # 7 is the length of 'value="'
+                    value_end = package_id.find('"', value_start)
+                    package_id2 = package_id[value_start:value_end]
+                    #package_id_blocks = package_id.split('value="') 
+                    #package_id2 = package_id_blocks[1].removesuffix('">')
+                    print(f"New package id: {package_id2}")
+                    package = Package.query.get(int(package_id2))
+                    assignee_packages.append(package)
+
+
             #create assignee
             assignee = Assignee(name=assignee_form.name.data,
                                 nationality=assignee_form.nationality.data,
@@ -140,27 +169,20 @@ def new_assignee():
                                 pets=assignee_form.pets.data,
                                 hub=assignee_form.hub.data,
                                 hr_contact=assignee_form.hr_contact.data,
-                                job_title=assignee_form.job_title.data
+                                job_title=assignee_form.job_title.data,
+                                packages=assignee_packages
                                 )
-            
+        
+
+
+
             db.session.add(assignee)
             db.session.commit()
-            flash("Assignee successfully added")
-
-            #create AssigneePackage Entries
-            for assignee_package in assignee_form.assignee_packages:
-                if assignee_package.package_status == True:
-                    #new_assignee_package = an object that can be sent to the db
-                    #commit to db
-                    ...
-                else:
-                    pass
-            #flash packages created
-
+            flash("Assignee successfully added with packages")
             return redirect(url_for("assignees"))
         
         except Exception as e:
-            pprint.pp(request.form)
+            #pprint.pp(request.form)
             db.session.rollback()
             flash(f"An error occured: {str(e)}", "error")
             return redirect(url_for("assignees"))
@@ -334,9 +356,10 @@ def companies():
     companies = db.session.execute(
         sa.select(Company)
         .where(Company.active == True)
+        .order_by(Company.name)
     ).scalars().all()
 
-    return render_template("companies.html", companies=companies)
+    return render_template("companies.html", title="CMS - View All Comapnies", companies=companies)
 
 @app.route("/companies/add_company", methods=["GET", "POST"])
 @login_required

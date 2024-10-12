@@ -10,6 +10,14 @@ from app import db, login
 def load_user(id):
     return db.session.get(User, int(id))
 
+# New association table for Assignee and Package
+assignee_package = sa.Table(
+    "assignee_package",
+    db.metadata,
+    sa.Column("assignee_id", sa.Integer, sa.ForeignKey("assignee.id")),
+    sa.Column("package_id", sa.Integer, sa.ForeignKey("package.id"))
+)
+
 class User(UserMixin, db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True, unique=True)
@@ -76,14 +84,6 @@ class CompanyPackage(db.Model):
         company_name = self.company.name if self.company else "Unknown Company"
         return f"<CompanyPackage {package_name} for {company_name}: €{self.price}>"
     
-# New association table for Assignee and Package
-assignee_package = sa.Table(
-    "assignee_package",
-    db.metadata,
-    sa.Column("assignee_id", sa.Integer, sa.ForeignKey("assignee.id")),
-    sa.Column("package_id", sa.Integer, sa.ForeignKey("package.id"))
-)
-
 
 class Assignee(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)

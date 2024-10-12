@@ -14,6 +14,12 @@
     <b>Spouse:</b> {{ assignee.spouse }} <b>Child(ren):</b> {{ assignee.child }} <b>Pets:</b> {{ assignee.pets }} <b>Temp Flat:</b> {{ assignee.temp_flat }}<br>
     <b>HR Contact:</b> {{ assignee.hr_contact }} <b>Job title:</b> {{ assignee.job_title }}<br>
 </p>
+<h2>Packages:</h2>
+    <p>
+        {% for package in assignee.packages %}
+            {{package.name}}
+        {% endfor %}
+    </p>
 <button type="button" class="btn btn-success">
     <a href="{{url_for('edit_assignee', assignee_id=assignee.id)}}" style="color: white;">Edit</a>
 </button>
